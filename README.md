@@ -118,7 +118,7 @@ void gio::shift::send_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, 
 ```cpp
 SSPI<0, freq> spi;                  // аппаратный без пина CS
 SSPI<0, freq, cs> spi;              // аппаратный с пином CS в шаблоне
-SSPI<0, freq> spi(cs);  		    // аппаратный с пином CS в классе
+SSPI<0, freq> spi(cs);              // аппаратный с пином CS в классе
 SSPI<1, freq, cs, dt, clk> spi;	    // программный с пинами в шаблоне
 SSPI<1, freq> spi(cs, dt, clk);	    // программный с пинами в классе
 ```
