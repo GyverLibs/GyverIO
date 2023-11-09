@@ -24,21 +24,20 @@ namespace gio {
 
 // mode (only INPUT OUTPUT)
 _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
+    if (!digitalPinIsValid(pin)) return;
     if (mode == INPUT) {
 #if CONFIG_IDF_TARGET_ESP32C3
         GPIO.enable_w1tc.val = (1ul << pin);
 #else
-        if (digitalPinIsValid(pin)) {
-            __esp32_rtc_idf3(pin);
-            if (pin < 32) GPIO.enable_w1tc = (1ul << pin);
-            else GPIO.enable1_w1tc.val = (1ul << (pin - 32));
-        }
+        __esp32_rtc_idf3(pin);
+        if (pin < 32) GPIO.enable_w1tc = (1ul << pin);
+        else GPIO.enable1_w1tc.val = (1ul << (pin - 32));
 #endif
     } else if (mode == OUTPUT) {
 #if CONFIG_IDF_TARGET_ESP32C3
         GPIO.enable_w1ts.val = (1ul << (pin));
 #else
-        if (digitalPinIsValid(pin) && pin <= 33) {
+        if (pin <= 33) {
             __esp32_rtc_idf3(pin);
             if (pin < 32) GPIO.enable_w1ts = (1ul << pin);
             else GPIO.enable1_w1ts.val = (1ul << (pin - 32));
@@ -49,6 +48,7 @@ _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
 
 // read
 _GIO_INLINE int read(uint8_t pin) {
+    if (!digitalPinIsValid(pin)) return;
 #if CONFIG_IDF_TARGET_ESP32C3
     return (GPIO.in.val >> pin) & 0x1;
 #else
@@ -59,6 +59,7 @@ _GIO_INLINE int read(uint8_t pin) {
 
 // low
 _GIO_INLINE void low(uint8_t pin) {
+    if (!digitalPinIsValid(pin)) return;
 #if CONFIG_IDF_TARGET_ESP32C3
     GPIO.out_w1tc.val = (1ul << pin);
 #else
@@ -69,6 +70,7 @@ _GIO_INLINE void low(uint8_t pin) {
 
 // high
 _GIO_INLINE void high(uint8_t pin) {
+    if (!digitalPinIsValid(pin)) return;
 #if CONFIG_IDF_TARGET_ESP32C3
     GPIO.out_w1ts.val = (1ul << pin);
 #else
@@ -93,6 +95,6 @@ _GIO_INLINE void init(int P) {
     pinMode(P, INPUT);
 }
 
-}
+}  // namespace gio
 
 #endif

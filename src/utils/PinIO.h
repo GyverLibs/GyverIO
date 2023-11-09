@@ -31,7 +31,7 @@ class PinIO {
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         greg_write(reg, mask, val);
 #else
-        write(pin, val);
+        gio::write(pin, val);
 #endif
     }
 
@@ -39,7 +39,7 @@ class PinIO {
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         greg_set(reg, mask);
 #else
-        high(pin);
+        gio::high(pin);
 #endif
     }
 
@@ -47,7 +47,7 @@ class PinIO {
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         greg_clr(reg, mask);
 #else
-        low(pin);
+        gio::low(pin);
 #endif
     }
 
@@ -55,7 +55,7 @@ class PinIO {
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         *reg ^= mask;
 #else
-        toggle(pin);
+        gio::toggle(pin);
 #endif
     }
 
@@ -63,7 +63,7 @@ class PinIO {
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         return greg_read(reg, mask);
 #else
-        return read(pin);
+        return gio::read(pin);
 #endif
     }
 
