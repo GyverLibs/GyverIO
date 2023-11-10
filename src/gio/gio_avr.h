@@ -274,12 +274,23 @@ _GIO_INLINE void mode(int P, int V) {
                 bitSet(*__avr_pin_to_ddr(P), __avr_pin_to_bit(P));
                 break;
         }
-    } else {
-        pinMode(P, V);
-    }
-#else
-    pinMode(P, V);
+    } else
 #endif
+    {
+        switch (V) {
+            case INPUT:
+                greg_clr(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+                greg_clr(portOutputRegister(P), digitalPinToBitMask(P));
+                break;
+            case INPUT_PULLUP:
+                greg_clr(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+                greg_set(portOutputRegister(P), digitalPinToBitMask(P));
+                break;
+            case OUTPUT:
+                greg_set(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+                break;
+        }
+    }
 }
 
 // read
@@ -287,12 +298,11 @@ _GIO_INLINE int read(int P) {
 #if defined(__avr_pin_to_pin)
     if (__builtin_constant_p(P)) {
         return (bitRead(*__avr_pin_to_pin(P), __avr_pin_to_bit(P))) ? 1 : 0;
-    } else {
-        return digitalRead(P);
-    }
-#else
-    return digitalRead(P);
+    } else
 #endif
+    {
+        return greg_read(portInputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+    }
 }
 
 // high
@@ -300,12 +310,11 @@ _GIO_INLINE void high(int P) {
 #if defined(__avr_pin_to_port)
     if (__builtin_constant_p(P)) {
         bitSet(*__avr_pin_to_port(P), __avr_pin_to_bit(P));
-    } else {
-        digitalWrite(P, 1);
-    }
-#else
-    digitalWrite(P, 1);
+    } else
 #endif
+    {
+        greg_clr(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+    }
 }
 
 // low
@@ -313,12 +322,11 @@ _GIO_INLINE void low(int P) {
 #if defined(__avr_pin_to_port)
     if (__builtin_constant_p(P)) {
         bitClear(*__avr_pin_to_port(P), __avr_pin_to_bit(P));
-    } else {
-        digitalWrite(P, 0);
-    }
-#else
-    digitalWrite(P, 0);
+    } else
 #endif
+    {
+        greg_set(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+    }
 }
 
 // write
@@ -332,18 +340,17 @@ _GIO_INLINE void toggle(int P) {
 #if defined(__avr_pin_to_pin)
     if (__builtin_constant_p(P)) {
         bitSet(*__avr_pin_to_pin(P), __avr_pin_to_bit(P));
-    } else {
-        digitalWrite(P, !digitalRead(P));
-    }
-#else
-    digitalWrite(P, !digitalRead(P));
+    } else
 #endif
+    {
+        greg_set(portInputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+    }
 }
 
 // init
 _GIO_INLINE void init(int P) {
 }
 
-}
+}  // namespace gio
 
 #endif

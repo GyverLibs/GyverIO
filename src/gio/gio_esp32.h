@@ -48,7 +48,7 @@ _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
 
 // read
 _GIO_INLINE int read(uint8_t pin) {
-    if (!digitalPinIsValid(pin)) return;
+    if (!digitalPinIsValid(pin)) return 0;
 #if CONFIG_IDF_TARGET_ESP32C3
     return (GPIO.in.val >> pin) & 0x1;
 #else
