@@ -313,7 +313,7 @@ _GIO_INLINE void high(int P) {
     } else
 #endif
     {
-        greg_clr(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+        greg_set(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
     }
 }
 
@@ -325,7 +325,7 @@ _GIO_INLINE void low(int P) {
     } else
 #endif
     {
-        greg_set(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+        greg_clr(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
     }
 }
 
