@@ -8,27 +8,41 @@
 namespace gio {
 
 // mode
-// only INPUT, OUTPUT
 _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
-    if (pin < 16) {
-        // if (mode == INPUT) GPE &= ~(1 << pin);
-        // else if (mode == OUTPUT) GPE |= (1 << pin);
+    // dsnt work
+    // if (mode == INPUT) GPE &= ~(1 << pin);
+    // else if (mode == OUTPUT) GPE |= (1 << pin);
 
-        GPF(pin) = GPFFS(GPFFS_GPIO(pin));
-        if (mode == OUTPUT) {
-            GPC(pin) = (GPC(pin) & (0xF << GPCI));
-            GPES = (1 << pin);
-        } else if (mode == INPUT || mode == INPUT_PULLUP) {
-            GPEC = (1 << pin);
-            GPC(pin) = (GPC(pin) & (0xF << GPCI)) | (1 << GPCD);
-            if (mode == INPUT_PULLUP) GPF(pin) |= (1 << GPFPU);
-        }
+    switch (mode) {
+        case INPUT:
+        case INPUT_PULLUP:
+            if (pin < 16) {
+                GPF(pin) = GPFFS(GPFFS_GPIO(pin));
+                GPEC = (1 << pin);
+                GPC(pin) = (GPC(pin) & (0xF << GPCI)) | (1 << GPCD);
+                if (mode == INPUT_PULLUP) GPF(pin) |= (1 << GPFPU);
+            } else if (pin == 16) {
+                GPF16 = GP16FFS(GPFFS_GPIO(pin));
+                GPC16 = 0;
+                GP16E &= ~1;
+            }
+            break;
 
-    } else if (pin == 16) {
-        GPF16 = GP16FFS(GPFFS_GPIO(pin));
-        GPC16 = 0;
-        if (mode == INPUT) GP16E &= ~1;
-        else if (mode == OUTPUT) GP16E |= 1;
+        case OUTPUT:
+            if (pin < 16) {
+                GPF(pin) = GPFFS(GPFFS_GPIO(pin));
+                GPC(pin) = (GPC(pin) & (0xF << GPCI));
+                GPES = (1 << pin);
+            } else if (pin == 16) {
+                GPF16 = GP16FFS(GPFFS_GPIO(pin));
+                GPC16 = 0;
+                GP16E |= 1;
+            }
+            break;
+
+        default:
+            pinMode(pin, mode);
+            break;
     }
 }
 
@@ -67,9 +81,10 @@ _GIO_INLINE void toggle(uint8_t pin) {
 }
 
 // init
-_GIO_INLINE void init(int P) {
+_GIO_INLINE void init(int P, int V = INPUT) {
+    mode(P, V);
 }
 
-}
+}  // namespace gio
 
 #endif

@@ -17,7 +17,7 @@ class PinIO {
     }
 
     void init(uint8_t npin, uint8_t mode = INPUT) {
-        pinMode(npin, mode);
+        gio::init(npin, mode);
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
         if (mode == OUTPUT) reg = portOutputRegister(digitalPinToPort(npin));
         else reg = portInputRegister(digitalPinToPort(npin));

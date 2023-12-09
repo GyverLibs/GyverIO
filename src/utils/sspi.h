@@ -13,23 +13,23 @@ class SSPI {
     SSPI(int8_t cs = -1, int8_t dat = -1, int8_t clk = -1) {
         if (_softT) {
             if (_datT >= 0) {
-                pinMode(_datT, OUTPUT);
-                pinMode(_clkT, OUTPUT);
+                gio::init(_datT, OUTPUT);
+                gio::init(_clkT, OUTPUT);
             } else {
                 _pins[1] = dat;
                 _pins[2] = clk;
-                pinMode(_pins[1], OUTPUT);
-                pinMode(_pins[2], OUTPUT);
+                gio::init(_pins[1], OUTPUT);
+                gio::init(_pins[2], OUTPUT);
             }
         }
 
         if (_csT >= 0) {
-            pinMode(_csT, OUTPUT);
+            gio::init(_csT, OUTPUT);
             gio::high(_csT);
         } else {
             _pins[0] = cs;
             if (cs >= 0) {
-                pinMode(cs, OUTPUT);
+                gio::init(cs, OUTPUT);
                 gio::high(cs);
             }
         }

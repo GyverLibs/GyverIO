@@ -10,11 +10,8 @@ namespace gio {
 template <uint8_t pin>
 class PinT {
    public:
-    PinT() {
-        gio::init(pin);
-    }
-    PinT(uint8_t mode) {
-        pinMode(pin, mode);
+    PinT(uint8_t mode = INPUT) {
+        gio::init(pin, mode);
     }
     _GIO_INLINE void mode(uint8_t mode) {
         gio::mode(pin, mode);

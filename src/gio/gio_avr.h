@@ -348,7 +348,8 @@ _GIO_INLINE void toggle(int P) {
 }
 
 // init
-_GIO_INLINE void init(int P) {
+_GIO_INLINE void init(int P, int V = INPUT) {
+    mode(P, V);
 }
 
 }  // namespace gio

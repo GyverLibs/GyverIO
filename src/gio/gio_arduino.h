@@ -36,8 +36,8 @@ _GIO_INLINE void toggle(int P) {
 }
 
 // init
-_GIO_INLINE void init(int P) {
-    pinMode(P, INPUT);
+_GIO_INLINE void init(int P, int V = INPUT) {
+    mode(P, V);
 }
 
 }
