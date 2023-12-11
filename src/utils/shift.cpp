@@ -1,5 +1,10 @@
 #include "shift.h"
 
+#define LSB_NORMAL 0b00
+#define MSB_NORMAL 0b01
+#define LSB_REVERSE 0b10
+#define MSB_REVERSE 0b11
+
 namespace gio::shift {
 
 void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
@@ -13,7 +18,7 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
         for (uint16_t b = 0; b < len; b++) {
             val = 0;
             for (uint8_t i = 0; i < 8; i++) {
-                if (order == MSBFIRST) {
+                if (order & 0b01) {  // MSBFIRST
                     val <<= 1;
                     if (greg_read(d_reg, c_mask)) val |= 1;
                 } else {
@@ -24,7 +29,7 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                 if (delay) delayMicroseconds(delay);
                 greg_clr(c_reg, c_mask);
             }
-            data[b] = val;
+            data[(order & 0b10) ? (len - b - 1) : b] = val;
         }
         greg_clr(d_reg, d_mask);
     } else
@@ -34,7 +39,7 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
         for (uint16_t b = 0; b < len; b++) {
             val = 0;
             for (uint8_t i = 0; i < 8; i++) {
-                if (order == MSBFIRST) {
+                if (order & 0b01) {  // MSBFIRST
                     val <<= 1;
                     if (gio::read(dat_pin)) val |= 1;
                 } else {
@@ -45,7 +50,7 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                 if (delay) delayMicroseconds(delay);
                 gio::low(clk_pin);
             }
-            data[b] = val;
+            data[(order & 0b10) ? (len - b - 1) : b] = val;
         }
     }
 }
@@ -77,9 +82,9 @@ void send(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
         uint8_t d_mask = digitalPinToBitMask(dat_pin);
         uint8_t val;
         for (uint16_t b = 0; b < len; b++) {
-            val = data[b];
+            val = data[(order & 0b10) ? (len - b - 1) : b];
             for (uint8_t i = 0; i < 8; i++) {
-                if (order == MSBFIRST) {
+                if (order & 0b01) {  // MSBFIRST
                     greg_write(d_reg, d_mask, val & (1 << 7));
                     val <<= 1;
                 } else {
@@ -96,9 +101,9 @@ void send(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
 #endif
     {
         for (uint16_t b = 0; b < len; b++) {
-            uint8_t val = data[b];
+            uint8_t val = data[(order & 0b10) ? (len - b - 1) : b];
             for (uint8_t i = 0; i < 8; i++) {
-                if (order == MSBFIRST) {
+                if (order & 0b01) {  // MSBFIRST
                     gio::write(dat_pin, val & (1 << 7));
                     val <<= 1;
                 } else {
