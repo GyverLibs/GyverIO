@@ -4,6 +4,11 @@
 
 #include "gio/gio.h"
 
+#define LSB_NORMAL 0b00
+#define MSB_NORMAL 0b01
+#define LSB_REVERSE 0b10
+#define MSB_REVERSE 0b11
+
 namespace gio::shift {
 
 // read

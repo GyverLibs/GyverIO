@@ -1,10 +1,5 @@
 #include "shift.h"
 
-#define LSB_NORMAL 0b00
-#define MSB_NORMAL 0b01
-#define LSB_REVERSE 0b10
-#define MSB_REVERSE 0b11
-
 namespace gio::shift {
 
 void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
