@@ -12,14 +12,14 @@
 namespace gio::shift {
 
 // read
-// прочитать пакет
-void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+// прочитать пакет. Вернёт true, если хотя бы один бит отличается
+bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
 
 // прочитать байт
 uint8_t read_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t delay = 0);
 
-// прочитать пакет + cs пин
-void read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+// прочитать пакет + cs пин. Вернёт true, если хотя бы один бит отличается
+bool read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
 
 // прочитать байт + cs пин
 uint8_t read_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t delay = 0);

@@ -89,14 +89,14 @@ void gio::init(int P);
 Быстрый аналог shiftIn/shiftOut (отправка данных с клоком)
 
 ```cpp
-// прочитать пакет
-void gio::shift::read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+// прочитать пакет. Вернёт true, если хотя бы один бит отличается
+bool gio::shift::read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
 
 // прочитать байт
 uint8_t gio::shift::read_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t delay = 0);
 
-// прочитать пакет + cs пин
-void gio::shift::read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+// прочитать пакет + cs пин. Вернёт true, если хотя бы один бит отличается
+bool gio::shift::read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
 
 // прочитать байт + cs пин
 uint8_t gio::shift::read_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t delay = 0);
@@ -159,7 +159,8 @@ gio::shift::send(3, 4, MSBFIRST, data, 4);
 - v1.2 - исправлена ошибка!
 - v1.2.1 - небольшая оптимизация
 - v1.2.2 - добавлена инверсия в shift
-- v1.2.4 - исправлен баг в gio::read для AVR NC
+- v1.2.4 - исправлен баг в gio::shift::read для AVR NC
+- v1.2.5 - добавлен возврат true в gio::shift::read при изменении буфера
 
 <a id="install"></a>
 ## Установка

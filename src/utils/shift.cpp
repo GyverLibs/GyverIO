@@ -2,7 +2,10 @@
 
 namespace gio::shift {
 
-void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
+bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
+    bool dif = 0;
+    if (order & 0b10) data += len - 1;
+
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
     if (!__builtin_constant_p(dat_pin) || !__builtin_constant_p(clk_pin)) {
         volatile uint8_t* c_reg = portOutputRegister(digitalPinToPort(clk_pin));
@@ -10,7 +13,7 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
         uint8_t c_mask = digitalPinToBitMask(clk_pin);
         uint8_t d_mask = digitalPinToBitMask(dat_pin);
         uint8_t val = 0;
-        for (uint16_t b = 0; b < len; b++) {
+        while (len--) {
             val = 0;
             for (uint8_t i = 0; i < 8; i++) {
                 if (order & 0b01) {  // MSBFIRST
@@ -24,14 +27,16 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                 if (delay) delayMicroseconds(delay);
                 greg_clr(c_reg, c_mask);
             }
-            data[(order & 0b10) ? (len - b - 1) : b] = val;
+            if (!dif && *data != val) dif = 1;
+            *data = val;
+            data += (order & 0b10) ? -1 : 1;
         }
         greg_clr(d_reg, d_mask);
     } else
 #endif
     {
         uint8_t val = 0;
-        for (uint16_t b = 0; b < len; b++) {
+        while (len--) {
             val = 0;
             for (uint8_t i = 0; i < 8; i++) {
                 if (order & 0b01) {  // MSBFIRST
@@ -45,9 +50,12 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                 if (delay) delayMicroseconds(delay);
                 gio::low(clk_pin);
             }
-            data[(order & 0b10) ? (len - b - 1) : b] = val;
+            if (!dif && *data != val) dif = 1;
+            *data = val;
+            data += (order & 0b10) ? -1 : 1;
         }
     }
+    return dif;
 }
 
 uint8_t read_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t delay) {
@@ -56,10 +64,11 @@ uint8_t read_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t delay
     return value;
 }
 
-void read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
+bool read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
     gio::low(cs_pin);
-    read(dat_pin, clk_pin, order, data, len, delay);
+    bool res = read(dat_pin, clk_pin, order, data, len, delay);
     gio::high(cs_pin);
+    return res;
 }
 
 uint8_t read_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t delay) {
