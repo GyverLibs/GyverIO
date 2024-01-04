@@ -15,10 +15,10 @@ void read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
             for (uint8_t i = 0; i < 8; i++) {
                 if (order & 0b01) {  // MSBFIRST
                     val <<= 1;
-                    if (greg_read(d_reg, c_mask)) val |= 1;
+                    if (greg_read(d_reg, d_mask)) val |= 1;
                 } else {
                     val >>= 1;
-                    if (greg_read(d_reg, c_mask)) val |= (1 << 7);
+                    if (greg_read(d_reg, d_mask)) val |= (1 << 7);
                 }
                 greg_set(c_reg, c_mask);
                 if (delay) delayMicroseconds(delay);
