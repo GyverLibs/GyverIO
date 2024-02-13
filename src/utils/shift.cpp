@@ -1,6 +1,7 @@
 #include "shift.h"
 
-namespace gio::shift {
+namespace gio {
+namespace shift {
 
 bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
     bool dif = 0;
@@ -137,4 +138,5 @@ void send_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t orde
     send_cs(dat_pin, clk_pin, cs_pin, order, &data, 1, delay);
 }
 
-}  // namespace gio::shift
+}  // namespace shift
+}  // namespace gio
