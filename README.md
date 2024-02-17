@@ -161,6 +161,7 @@ gio::shift::send(3, 4, MSBFIRST, data, 4);
 - v1.2.2 - добавлена инверсия в shift
 - v1.2.4 - исправлен баг в gio::shift::read для AVR NC
 - v1.2.5 - добавлен возврат true в gio::shift::read при изменении буфера
+- v1.3.0 - исправлена критическая ошибка AVR/mode/NC
 
 <a id="install"></a>
 ## Установка

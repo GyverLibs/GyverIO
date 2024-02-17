@@ -280,11 +280,11 @@ _GIO_INLINE void mode(int P, int V) {
         switch (V) {
             case INPUT:
                 greg_clr(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
-                greg_clr(portOutputRegister(P), digitalPinToBitMask(P));
+                greg_clr(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
                 break;
             case INPUT_PULLUP:
                 greg_clr(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
-                greg_set(portOutputRegister(P), digitalPinToBitMask(P));
+                greg_set(portOutputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
                 break;
             case OUTPUT:
                 greg_set(portModeRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
