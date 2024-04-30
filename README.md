@@ -85,6 +85,7 @@ void gio::mode(int P, int V);
 // иначе mode() не будет работать!
 void gio::init(int P);
 ```
+> У esp8266/esp32 нужно обязательно вызвать `gio::init` перед использованием!
 
 ### gio::shift
 Быстрый аналог shiftIn/shiftOut (отправка данных с клоком)
