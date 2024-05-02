@@ -24,10 +24,10 @@ bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                     val >>= 1;
                     if (greg_read(d_reg, d_mask)) val |= (1 << 7);
                 }
+                if (delay) delayMicroseconds(delay);
                 greg_set(c_reg, c_mask);
                 if (delay) delayMicroseconds(delay);
                 greg_clr(c_reg, c_mask);
-                if (delay) delayMicroseconds(delay);
             }
             if (!dif && *data != val) dif = 1;
             *data = val;
@@ -48,10 +48,10 @@ bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                     val >>= 1;
                     if (gio::read(dat_pin)) val |= (1 << 7);
                 }
+                if (delay) delayMicroseconds(delay);
                 gio::high(clk_pin);
                 if (delay) delayMicroseconds(delay);
                 gio::low(clk_pin);
-                if (delay) delayMicroseconds(delay);
             }
             if (!dif && *data != val) dif = 1;
             *data = val;
@@ -98,10 +98,10 @@ void send(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                     greg_write(d_reg, d_mask, val & 1);
                     val >>= 1;
                 }
+                if (delay) delayMicroseconds(delay);
                 greg_set(c_reg, c_mask);
                 if (delay) delayMicroseconds(delay);
                 greg_clr(c_reg, c_mask);
-                if (delay) delayMicroseconds(delay);
             }
         }
         greg_clr(d_reg, d_mask);
@@ -118,10 +118,10 @@ void send(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
                     gio::write(dat_pin, val & 1);
                     val >>= 1;
                 }
+                if (delay) delayMicroseconds(delay);
                 gio::high(clk_pin);
                 if (delay) delayMicroseconds(delay);
                 gio::low(clk_pin);
-                if (delay) delayMicroseconds(delay);
             }
             gio::low(dat_pin);
         }
