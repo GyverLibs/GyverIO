@@ -5,6 +5,7 @@
 
 #include <Arduino.h>
 #include <driver/rtc_io.h>
+#include <soc/gpio_struct.h>
 
 #include "gio_defs.h"
 
