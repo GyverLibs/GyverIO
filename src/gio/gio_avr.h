@@ -331,8 +331,7 @@ _GIO_INLINE void low(int P) {
 
 // write
 _GIO_INLINE void write(int P, int V) {
-    if (V) high(P);
-    else low(P);
+    V ? high(P) : low(P);
 }
 
 // toggle

@@ -65,8 +65,7 @@ _GIO_INLINE void high(uint8_t pin) {
 
 // write
 _GIO_INLINE void write(uint8_t pin, uint8_t val) {
-    if (val) high(pin);
-    else low(pin);
+    val ? high(pin) : low(pin);
 }
 
 // toggle
