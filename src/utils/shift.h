@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "gio/gio.h"
+#include "../gio/gio.h"
 
 #define LSB_NORMAL 0b00
 #define MSB_NORMAL 0b01

@@ -2,8 +2,8 @@
 
 #include <Arduino.h>
 
-#include "gio/gio.h"
-#include "gio/gio_defs.h"
+#include "../gio/gio.h"
+#include "../gio/gio_defs.h"
 
 namespace gio {
 

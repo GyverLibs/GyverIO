@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 
-#include "gio/gio.h"
+#include "../gio/gio.h"
 
 // #define GIO_NO_MASK
 
