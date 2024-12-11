@@ -11,21 +11,20 @@
 
 namespace gio {
 
-// low idf
+void __esp32_rtc_idf3(uint8_t pin) {
 #if ESP_IDF_VERSION_MAJOR < 4
-#define __esp32_rtc_idf3(pin)                                                                             \
-    uint32_t rtc_reg(rtc_gpio_desc[pin].reg);                                                             \
-    if (rtc_reg) {                                                                                        \
-        ESP_REG(rtc_reg) = ESP_REG(rtc_reg) & ~(rtc_gpio_desc[pin].mux);                                  \
-        ESP_REG(rtc_reg) = ESP_REG(rtc_reg) & ~(rtc_gpio_desc[pin].pullup | rtc_gpio_desc[pin].pulldown); \
+    uint32_t rtc_reg(rtc_gpio_desc[pin].reg);
+    if (rtc_reg) {
+        ESP_REG(rtc_reg) = ESP_REG(rtc_reg) & ~(rtc_gpio_desc[pin].mux);
+        ESP_REG(rtc_reg) = ESP_REG(rtc_reg) & ~(rtc_gpio_desc[pin].pullup | rtc_gpio_desc[pin].pulldown);
     }
-#else
-#define __esp32_rtc_idf3(pin)
 #endif
+}
 
 // mode
 _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
     if (!digitalPinIsValid(pin)) return;
+
     switch (mode) {
         case INPUT:
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
