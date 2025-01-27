@@ -60,8 +60,10 @@ _GIO_INLINE int read(uint8_t pin) {
 #if CONFIG_IDF_TARGET_ESP32C3
     return (GPIO.in.val >> pin) & 0x1;
 #else
-    if (pin < 32) return (GPIO.in >> pin) & 0x1;
-    else if (pin < 46) return (GPIO.in1.val >> (pin - 32)) & 0x1;
+    if (digitalPinIsValid(pin)) {
+        if (pin < 32) return (GPIO.in >> pin) & 0x1;
+        else return (GPIO.in1.val >> (pin - 32)) & 0x1;
+    }
 #endif
     return 0;
 }
@@ -71,8 +73,10 @@ _GIO_INLINE void low(uint8_t pin) {
 #if CONFIG_IDF_TARGET_ESP32C3
     GPIO.out_w1tc.val = (1ul << pin);
 #else
-    if (pin < 32) GPIO.out_w1tc = (1ul << pin);
-    else if (pin < 46) GPIO.out1_w1tc.val = (1ul << (pin - 32));
+    if (digitalPinIsValid(pin)) {
+        if (pin < 32) GPIO.out_w1tc = (1ul << pin);
+        else GPIO.out1_w1tc.val = (1ul << (pin - 32));
+    }
 #endif
 }
 
@@ -81,8 +85,10 @@ _GIO_INLINE void high(uint8_t pin) {
 #if CONFIG_IDF_TARGET_ESP32C3
     GPIO.out_w1ts.val = (1ul << pin);
 #else
-    if (pin < 32) GPIO.out_w1ts = (1ul << pin);
-    else if (pin < 46) GPIO.out1_w1ts.val = (1ul << (pin - 32));
+    if (digitalPinIsValid(pin)) {
+        if (pin < 32) GPIO.out_w1ts = (1ul << pin);
+        else GPIO.out1_w1ts.val = (1ul << (pin - 32));
+    }
 #endif
 }
 
