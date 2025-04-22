@@ -33,7 +33,6 @@ bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16
             *data = val;
             data += (order & 0b10) ? -1 : 1;
         }
-        greg_clr(d_reg, d_mask);
     } else
 #endif
     {
