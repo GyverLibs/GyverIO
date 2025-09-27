@@ -67,12 +67,20 @@ class PinIO {
 #endif
     }
 
+    bool valid() {
+#if defined(__AVR__) && !defined(GIO_NO_MASK)
+        return reg;
+#else
+        return pin != 0xff;
+#endif
+    }
+
    private:
 #if defined(__AVR__) && !defined(GIO_NO_MASK)
-    volatile uint8_t *reg;
+    volatile uint8_t *reg = nullptr;
     uint8_t mask = 0xff;
 #else
-    uint8_t pin;
+    uint8_t pin = 0xff;
 #endif
 };
 
