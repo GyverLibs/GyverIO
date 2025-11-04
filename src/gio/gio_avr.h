@@ -258,7 +258,7 @@
 namespace gio {
 
 // mode
-_GIO_INLINE void mode(int P, int V) {
+_GIO_INLINE void mode(uint8_t P, uint8_t V) {
 #if defined(__avr_pin_to_port)
     if (__builtin_constant_p(P) && __builtin_constant_p(V)) {
         switch (V) {
@@ -294,7 +294,7 @@ _GIO_INLINE void mode(int P, int V) {
 }
 
 // read
-_GIO_INLINE int read(int P) {
+_GIO_INLINE int read(uint8_t P) {
 #if defined(__avr_pin_to_pin)
     if (__builtin_constant_p(P)) {
         return (bitRead(*__avr_pin_to_pin(P), __avr_pin_to_bit(P))) ? 1 : 0;
@@ -306,7 +306,7 @@ _GIO_INLINE int read(int P) {
 }
 
 // high
-_GIO_INLINE void high(int P) {
+_GIO_INLINE void high(uint8_t P) {
 #if defined(__avr_pin_to_port)
     if (__builtin_constant_p(P)) {
         bitSet(*__avr_pin_to_port(P), __avr_pin_to_bit(P));
@@ -318,7 +318,7 @@ _GIO_INLINE void high(int P) {
 }
 
 // low
-_GIO_INLINE void low(int P) {
+_GIO_INLINE void low(uint8_t P) {
 #if defined(__avr_pin_to_port)
     if (__builtin_constant_p(P)) {
         bitClear(*__avr_pin_to_port(P), __avr_pin_to_bit(P));
@@ -330,12 +330,12 @@ _GIO_INLINE void low(int P) {
 }
 
 // write
-_GIO_INLINE void write(int P, int V) {
+_GIO_INLINE void write(uint8_t P, uint8_t V) {
     V ? high(P) : low(P);
 }
 
 // toggle
-_GIO_INLINE void toggle(int P) {
+_GIO_INLINE void toggle(uint8_t P) {
 #if defined(__avr_pin_to_pin)
     if (__builtin_constant_p(P)) {
         bitSet(*__avr_pin_to_pin(P), __avr_pin_to_bit(P));
@@ -347,7 +347,7 @@ _GIO_INLINE void toggle(int P) {
 }
 
 // init
-_GIO_INLINE void init(int P, int V = INPUT) {
+_GIO_INLINE void init(uint8_t P, uint8_t V = INPUT) {
     mode(P, V);
 }
 

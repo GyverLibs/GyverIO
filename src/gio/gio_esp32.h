@@ -9,6 +9,7 @@
 
 #include "gio_defs.h"
 
+// old idf
 #if ESP_IDF_VERSION_MAJOR < 4
 #define _ESP32_IDF_V3_REG()                                                                               \
     uint32_t rtc_reg(rtc_gpio_desc[pin].reg);                                                             \
@@ -20,7 +21,10 @@
 #define _ESP32_IDF_V3_REG()
 #endif
 
-#define _IS_ESP_Cx_ defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+// esp Cx
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
+#define _IS_ESP_Cx_
+#endif
 
 namespace gio {
 
@@ -28,7 +32,8 @@ namespace gio {
 _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
     switch (mode) {
         case INPUT:
-#if _IS_ESP_Cx_
+            pin = digitalPinToGPIONumber(pin);
+#ifdef _IS_ESP_Cx_
             GPIO.enable_w1tc.val = (1ul << (pin));
 #else
             if (digitalPinIsValid(pin)) {
@@ -40,7 +45,8 @@ _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
             break;
 
         case OUTPUT:
-#if _IS_ESP_Cx_
+            pin = digitalPinToGPIONumber(pin);
+#ifdef _IS_ESP_Cx_
             GPIO.enable_w1ts.val = (1ul << (pin));
 #else
             if (digitalPinIsValid(pin)) {
@@ -59,7 +65,8 @@ _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
 
 // read
 _GIO_INLINE int read(uint8_t pin) {
-#if _IS_ESP_Cx_
+    pin = digitalPinToGPIONumber(pin);
+#ifdef _IS_ESP_Cx_
     return (GPIO.in.val >> pin) & 0x1;
 #else
     if (digitalPinIsValid(pin)) {
@@ -72,7 +79,8 @@ _GIO_INLINE int read(uint8_t pin) {
 
 // low
 _GIO_INLINE void low(uint8_t pin) {
-#if _IS_ESP_Cx_
+    pin = digitalPinToGPIONumber(pin);
+#ifdef _IS_ESP_Cx_
     GPIO.out_w1tc.val = (1ul << pin);
 #else
     if (digitalPinIsValid(pin)) {
@@ -84,7 +92,8 @@ _GIO_INLINE void low(uint8_t pin) {
 
 // high
 _GIO_INLINE void high(uint8_t pin) {
-#if _IS_ESP_Cx_
+    pin = digitalPinToGPIONumber(pin);
+#ifdef _IS_ESP_Cx_
     GPIO.out_w1ts.val = (1ul << pin);
 #else
     if (digitalPinIsValid(pin)) {
@@ -105,7 +114,7 @@ _GIO_INLINE void toggle(uint8_t pin) {
 }
 
 // init
-_GIO_INLINE void init(int P, int V = INPUT) {
+_GIO_INLINE void init(uint8_t P, uint8_t V = INPUT) {
     pinMode(P, V);
 }
 

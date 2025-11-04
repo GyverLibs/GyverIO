@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #define _GIO_INLINE static inline __attribute__((always_inline))
 #define greg_set(reg, mask) *reg |= mask
 #define greg_clr(reg, mask) *reg &= ~mask

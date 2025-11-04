@@ -1,6 +1,6 @@
 #pragma once
 // быстрые функции пинов
-// #define GIO_USE_ARDUINO
+// #define GIO_USE_ARDUINO  // использовать стандартные
 
 #ifdef GIO_USE_ARDUINO
 #include "gio_arduino.h"
@@ -10,7 +10,7 @@
 #include "gio_avr.h"
 #elif defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
 #include "gio_esp8266.h"
-#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+#elif (defined(ESP32) || defined(ARDUINO_ARCH_ESP32)) && !defined(CONFIG_IDF_TARGET_ESP32P4)
 #include "gio_esp32.h"
 #else
 #include "gio_arduino.h"

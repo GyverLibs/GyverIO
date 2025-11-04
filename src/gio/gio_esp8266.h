@@ -9,10 +9,6 @@ namespace gio {
 
 // mode
 _GIO_INLINE void mode(uint8_t pin, uint8_t mode) {
-    // dsnt work
-    // if (mode == INPUT) GPE &= ~(1 << pin);
-    // else if (mode == OUTPUT) GPE |= (1 << pin);
-
     switch (mode) {
         case INPUT:
         case INPUT_PULLUP:
@@ -80,7 +76,7 @@ _GIO_INLINE void toggle(uint8_t pin) {
 }
 
 // init
-_GIO_INLINE void init(int P, int V = INPUT) {
+_GIO_INLINE void init(uint8_t P, uint8_t V = INPUT) {
     mode(P, V);
 }
 
