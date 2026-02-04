@@ -338,11 +338,11 @@ _GIO_INLINE void write(uint8_t P, uint8_t V) {
 _GIO_INLINE void toggle(uint8_t P) {
 #if defined(__avr_pin_to_pin)
     if (__builtin_constant_p(P)) {
-        bitSet(*__avr_pin_to_pin(P), __avr_pin_to_bit(P));
+        *__avr_pin_to_pin(P) = (1 << __avr_pin_to_bit(P));
     } else
 #endif
     {
-        greg_set(portInputRegister(digitalPinToPort(P)), digitalPinToBitMask(P));
+        *portInputRegister(digitalPinToPort(P)) = digitalPinToBitMask(P);
     }
 }
 
