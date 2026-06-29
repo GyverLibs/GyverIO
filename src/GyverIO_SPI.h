@@ -10,6 +10,8 @@ namespace gio {
 template <uint8_t _softT = 0, uint32_t _freqT = 4000000, int8_t _csT = -1, int8_t _datT = -1, int8_t _clkT = -1>
 class SSPI {
    public:
+    static_assert(_freqT > 0, "SSPI frequency must be greater than zero");
+
     SSPI(int8_t cs = -1, int8_t dat = -1, int8_t clk = -1) {
         if (_softT) {
             if (_datT >= 0) {

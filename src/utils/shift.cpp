@@ -4,6 +4,7 @@ namespace gio {
 namespace shift {
 
 bool read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay) {
+    if (!len) return false;
     bool dif = 0;
     if (order & 0b10) data += len - 1;
 
