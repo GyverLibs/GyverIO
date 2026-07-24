@@ -1,6 +1,9 @@
 #pragma once
 
-#include "gio/gio.h"
-#include "utils/PinIO.h"
-#include "utils/PinT.h"
-#include "utils/shift.h"
+#include "./bus/SoftSPI.h"
+#include "./bus/SoftWire.h"
+#include "./gio/gio.h"
+#include "./pin/PinIO.h"
+#include "./pin/PinSingle.h"
+#include "./pin/PinT.h"
+#include "./shift/shift.h"

@@ -12,6 +12,7 @@
 - Классы для быстрого управления пином
 - Отдельная обработка случаев константных и неконстантных пинов для AVR
 - Быстрая реализация функций shiftIn/shiftOut
+- Лёгкие программные `SoftWire` и `SoftSPI`
 - Универсальный класс hard SPI / soft SPI для использования в библиотеках
 
 ## Скорость
@@ -53,6 +54,10 @@
 
 > *NC* - пины не константы
 
+### Bus
+- SoftWire AVR: 80 kHz по умолч., 38 kHz с `GIO_NO_MASK`, 28 kHz с `GIO_USE_ARDUINO`
+- SoftSPI AVR: 200 kHz transfer, 1 MHz read
+
 ### Совместимость
 Совместима со всеми Arduino платформами (используются Arduino-функции)
 - Для esp8266 и esp32 быстрый `pinMode()` (`mode()`) работает только на режимы `INPUT`/`OUTPUT`! В остальных режимах вызывается штатный `pinMode()`
@@ -65,30 +70,31 @@
 - [Баги и обратная связь](#feedback)
 
 <a id="docs"></a>
+
 ## Документация
 ### gio
 Быстые функции для работы с пинами
 
 ```cpp
-int gio::read(int P);
-void gio::high(int P);
-void gio::low(int P)
-void gio::write(int P, int V);
+int gio::read(uint8_t P);
+void gio::high(uint8_t P);
+void gio::low(uint8_t P);
+void gio::write(uint8_t P, uint8_t V);
 
 //
-void gio::toggle(int P);
+void gio::toggle(uint8_t P);
 
 // режим пина. Для esp8266/esp32 только INPUT/OUTPUT!
-void gio::mode(int P, int V);
+void gio::mode(uint8_t P, uint8_t V);
 
 // нужно вызывать для esp8266/esp32 при инициализации пина
 // иначе mode() не будет работать!
-void gio::init(int P);
+void gio::init(uint8_t P, uint8_t V = INPUT);
 ```
-> У esp8266/esp32 нужно обязательно вызвать `gio::init` перед использованием!
+> Быстрые функции рассчитаны на валидные номера пинов. Проверки невалидных пинов намеренно не добавлены ради скорости и веса.
 
 ### gio::PinIO
-Класс для быстрого управления одним пином с номером, заданным во время выполнения.
+Класс для быстрого управления одним пином с номером, заданным во время выполнения. На AVR хранит регистры `DDR/PORT/PIN` и позволяет переключать режим через `mode()`.
 
 ```cpp
 gio::PinIO pin(5, OUTPUT);
@@ -99,7 +105,32 @@ pin.toggle();
 int value = pin.read();
 ```
 
-> На AVR режим, переданный в конструктор или `init()`, определяет сохранённый регистр. Для `OUTPUT` можно использовать `write()`, `high()`, `low()`, `toggle()` и `read()`. Для `INPUT` и `INPUT_PULLUP` безопасно использовать только `read()`: запись в регистр `PINx` переключает биты `PORTx` и может затронуть соседние пины того же порта.
+### gio::PinSingle
+Более лёгкий класс для одного пина в одном режиме. На AVR хранит только один регистр: `PORT` для `OUTPUT` или `PIN` для `INPUT/INPUT_PULLUP`.
+
+```cpp
+gio::PinSingle out(5, OUTPUT);
+out.high();
+out.low();
+out.write(1);
+
+gio::PinSingle inp(6, INPUT_PULLUP);
+int value = inp.read();
+```
+
+> `PinSingle` не предназначен для переключения режима после `init()`. Для пина в режиме `OUTPUT` используйте `write/high/low/toggle/read`, для `INPUT` и `INPUT_PULLUP` используйте `read()`.
+
+### gio::PinT
+Шаблонный класс для пина, известного на этапе компиляции.
+
+```cpp
+gio::PinT<5> pin(OUTPUT);
+pin.high();
+pin.low();
+pin.write(1);
+pin.toggle();
+int value = pin.read();
+```
 
 ### gio::shift
 Быстрый аналог shiftIn/shiftOut (отправка данных с клоком)
@@ -151,29 +182,82 @@ SSPI<1, freq, cs, dt, clk> spi;	    // программный с пинами в
 SSPI<1, freq> spi(cs, dt, clk);	    // программный с пинами в классе
 ```
 
+Для использования `SSPI` подключите отдельный заголовок:
+
+```cpp
+#include <GyverIO_SPI.h>
+```
+
+### SoftSPI
+Минимальный программный SPI master, mode 0, MSB first. Работает через `gio::PinSingle`.
+
+```cpp
+SoftSPI spi;
+spi.begin(miso, mosi, clk);
+spi.setClock(1000000);
+
+spi.write(0x9f);
+spi.write(data, len);
+
+int value = spi.read();      // dummy 0xff на MOSI
+spi.read(data, len);
+
+uint8_t rx = spi.transfer(tx);
+spi.transfer(data, len);     // обмен in-place
+```
+
+`setClock()` задаёт задержку полупериода. На высоких частотах задержка может стать 0, фактическая скорость будет ограничена скоростью GPIO и процессора. CS управляется отдельно.
+
+### SoftWire
+Минимальный программный I2C master с API, близким к `Wire`. Работает через `gio::PinIO`, поддерживает clock stretching с таймаутом и попытку восстановления шины при `begin()`.
+
+```cpp
+SoftWire wire;
+wire.begin(sda, scl);
+wire.setClock(100000);
+
+wire.beginTransmission(0x40);
+wire.write(0x01);
+wire.write(data, len);
+uint8_t status = wire.endTransmission();
+
+uint8_t count = wire.requestFrom(0x40, len);
+int value = wire.read();
+wire.read(data, len);
+
+wire.end();
+```
+
+Коды `endTransmission()` совместимы по смыслу с `Wire`: `0` - успех, `2` - NACK адреса, `3` - NACK данных, `4` - ошибка шины/таймаут.
+
 ### Настройки компиляции
 ```cpp
 #define GIO_USE_ARDUINO     // отключить быстрые функции (заменить на стандартные)
-#define GIO_NO_MASK         // отключить быстрый IO на основе маски для AVR (в классе PinIO и всех shift)
+#define GIO_NO_MASK         // отключить быстрый IO на основе маски для AVR (PinIO/PinSingle/shift)
 ```
 
 <a id="usage"></a>
 ## Использование
 
 ```cpp
-#include <GyverIO_SPI.h>
+#include <GyverIO.h>
 
 gio::write(3, 1);   // включить пин 3
 
 // отправить данные по пинам 3 и 4
 uint8_t data[] = {34, 63, 231, 9};
 gio::shift::send(3, 4, MSBFIRST, data, 4);
+```
+
+```cpp
+#include <GyverIO_SPI.h>
 
 SSPI<0, f, cs> spi;
 spi.send(0x12);
 ```
 
 <a id="versions"></a>
+
 ## Версии
 - v1.0
 - v1.1 - в 3 раза ускорен AVR non-const, обновлены таблицы
@@ -188,6 +272,7 @@ spi.send(0x12);
 - v1.3.4 - поддержка ESP32C6
 
 <a id="install"></a>
+
 ## Установка
 - Библиотеку можно найти по названию **GyverIO** и установить через менеджер библиотек в:
     - Arduino IDE
@@ -205,6 +290,7 @@ spi.send(0x12);
 - Вручную: **удалить папку со старой версией**, а затем положить на её место новую. "Замену" делать нельзя: иногда в новых версиях удаляются файлы, которые останутся при замене и могут привести к ошибкам!
 
 <a id="feedback"></a>
+
 ## Баги и обратная связь
 При нахождении багов создавайте **Issue**, а лучше сразу пишите на почту [alex@alexgyver.ru](mailto:alex@alexgyver.ru)  
 Библиотека открыта для доработки и ваших **Pull Request**'ов!

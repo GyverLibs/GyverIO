@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "utils/shift.h"
+#include "./shift/shift.h"
 
 namespace gio {
 

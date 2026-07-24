@@ -6,6 +6,7 @@ Fast functions for working with AVR Pin (a full list look at Gio_avr.h), ESP8266
 - Classes for quick PIN control
 - Separate processing of cases of constant and uncontrolled pins for AVR
 - Fast implementation of Shiftin/Shiftout
+- Lightweight software `SoftWire` and `SoftSPI`
 - Universal class Hard Spi / Soft SPI for use in libraries
 
 ## Speed
@@ -37,7 +38,7 @@ Fast functions for working with AVR Pin (a full list look at Gio_avr.h), ESP8266
 > ** Fat ** highlighted the worst time (Arduino not constants), *** with a fat italics *** - the best (gio constants)
 
 ### Shift (MHZ)
-||Shiftout |Gio :: Shift |
+||shiftOut |gio::shift |
 | -------- | ---------- | -----------------------------------
 |AVR NC |0.06 |0.66 |
 |AVR |0.06 |1.3 |
@@ -48,8 +49,8 @@ Fast functions for working with AVR Pin (a full list look at Gio_avr.h), ESP8266
 > * Nc * - Pins are not constants
 
 ## compatibility
-Compatible with all arduino platforms (used arduino functions)
-- For ESP8266 and ESP32, fast `pinmode ()` (`mode ()`) works only on `Input`/` output`!In other modes, the standard `pinmode ()` is called
+Compatible with all Arduino platforms. Unsupported platforms fall back to Arduino functions.
+- On ESP8266 and ESP32, fast `pinMode()` / `mode()` handles only `INPUT` and `OUTPUT`; other modes fall back to the standard `pinMode()`.
 
 ## Content
 - [documentation] (#docs)
@@ -60,25 +61,20 @@ Compatible with all arduino platforms (used arduino functions)
 
 <a id="docs"> </a>
 ## Documentation
-## Gio
-Squeezing pins
+### gio
+Fast pin functions.
 
-`` `CPP
-int Gio :: read (int p);
-Void Gio :: High (int p);
-Void Gio :: Low (int p)
-Void Gio :: Write (int p, int v);
+```cpp
+int gio::read(uint8_t P);
+void gio::high(uint8_t P);
+void gio::low(uint8_t P);
+void gio::write(uint8_t P, uint8_t V);
+void gio::toggle(uint8_t P);
+void gio::mode(uint8_t P, uint8_t V);
+void gio::init(uint8_t P, uint8_t V = INPUT);
+```
 
-//
-Void Gio :: Toggle (int p);
-
-// Pin mode.For ESP8266/ESP32 only Input/Output!
-Void Gio :: Mode (int p, int v);
-
-// you need to call for ESP8266/ESP32 when initializing the PIN
-// Otherwise, mod () will not work!
-Void Gio :: Init (int p);
-`` `
+Fast functions expect valid pin numbers. Invalid pin checks are intentionally omitted to keep the code small and fast.
 
 ### gio::PinIO
 A class for fast access to one pin whose number is selected at runtime.
@@ -92,74 +88,137 @@ pin.toggle();
 int value = pin.read();
 ```
 
-> On AVR, the mode passed to the constructor or `init()` selects the stored register. An `OUTPUT` object supports `write()`, `high()`, `low()`, `toggle()`, and `read()`. For `INPUT` and `INPUT_PULLUP`, only use `read()`: writing to the `PINx` register toggles `PORTx` bits and may affect neighboring pins on the same port.
+On AVR `PinIO` stores `DDR/PORT/PIN` registers and can switch mode with `mode()`.
 
-### Gio :: Shift
-Fast analogue Shiftin/Shiftout (sending data with a clock)
+### gio::PinSingle
+A lighter one-mode pin class. On AVR it stores only one register: `PORT` for `OUTPUT`, or `PIN` for `INPUT/INPUT_PULLUP`.
 
-`` `CPP
-// Read the package
-vOID GIO :: Shift :: Read (uint8_t data_pin, uint8_t clk_pin, uint8_t Order, uint8_t* Data, Uint16_t Len, Uint8_t Delay = 0);
+```cpp
+gio::PinSingle out(5, OUTPUT);
+out.high();
+out.low();
+out.write(1);
 
-// Read the byte
-uint8_t Gio :: Shift :: read_byte (uint8_t dat_pin, uint8_t clak_pin, uint8_t Order, uint8_t demely = 0);
+gio::PinSingle inp(6, INPUT_PULLUP);
+int value = inp.read();
+```
 
-// Read the package + cs pin
-VOID GIO :: Shift :: Read_cs (uint8_t data_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t Order, uint8_t* data, uint16_t Len, uint8_t Delay = 0);
+`PinSingle` is not intended for changing mode after `init()`. Use `write/high/low/toggle/read` for `OUTPUT` pins and `read()` for `INPUT` or `INPUT_PULLUP` pins.
 
-// read byte + cs pin
-Uint8_t Gio :: Shift :: Read_cs_byte (uint8_t data_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t dlavay = 0);
+### gio::PinT
+Template pin class for a pin known at compile time.
 
-// Send a package
-VOID Gio :: Shift :: Send (uint8_t data_pin, uint8_t clk_pin, uint8_t Order, uint8_t* data, uint16_t len, uint8_t dlavay = 0);
+```cpp
+gio::PinT<5> pin(OUTPUT);
+pin.high();
+pin.low();
+pin.write(1);
+pin.toggle();
+int value = pin.read();
+```
 
-// Send byte
-VOID Gio :: Shift :: Send_byte (uint8_t data_pin, uint8_t clk_pin, uint8_t order, uint8_t data, uint8_t demelavy = 0);
+### gio::shift
+Fast shiftIn/shiftOut analogue.
 
-// Send package + cs pin
-VOID Gio :: Shift :: Send_cs (uint8_t data_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t Order, uint8_t* data, uint16_t Len, uint8_t demelavy = 0);
+```cpp
+bool gio::shift::read(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+uint8_t gio::shift::read_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t delay = 0);
+bool gio::shift::read_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+uint8_t gio::shift::read_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t delay = 0);
 
-// Send byte + cs pin
-VOID GIO :: Shift :: Send_cs_byte (uint8_t data_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t ORDER, UINT8_T DATA, UINT8_T DELAY = 0);
-`` `
+void gio::shift::send(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+void gio::shift::send_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t order, uint8_t data, uint8_t delay = 0);
+void gio::shift::send_cs(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t* data, uint16_t len, uint8_t delay = 0);
+void gio::shift::send_cs_byte(uint8_t dat_pin, uint8_t clk_pin, uint8_t cs_pin, uint8_t order, uint8_t data, uint8_t delay = 0);
+```
 
 The `order` parameter can be:
-- `lsbfirst`/` lsb_normal` - lsb, direct bytes directly
-- `MSBFIRST`/` MSB_Normal` - MSB, direct bytes direct
-- `lsb_reverse` - lsb, reverse byte order
-- `MSB_Reverse` - MSB, reverse bytes
+- `LSBFIRST`/`LSB_NORMAL` - LSB first, normal byte order
+- `MSBFIRST`/`MSB_NORMAL` - MSB first, normal byte order
+- `LSB_REVERSE` - LSB first, reverse byte order
+- `MSB_REVERSE` - MSB first, reverse byte order
 
 #### Note
-- `Delay` in microseconds, allows you to reduce the speed of transmission.For example, `1` μs will limit speed up to ~ 1 MHz, 2 μs up to ~ 500 kHz
+- `delay` is in microseconds. For example, `1` us limits speed to about 1 MHz, `2` us to about 500 kHz
 - Pins should be configured as `output` yourself before sending (when starting a program for example)
 
-### Gio :: SSPI
+### gio::SSPI
 Universal class of software and hardware SPI with optimization of the number of variables for Pin
 
-`` `CPP
-SSPI <0, Freq> Spi;// hardware without PIN CS
-SSPI <0, Freq, CS> SPI;// Hardware with PIN CS in the template
-SSPI <0, Freq> Spi (CS);// Hardware with PIN CS in the classroom
-SSPI <1, Freq, CS, DT, CLK> Spi;// Program with pines in the template
-SSPI <1, FreQ> Spi (CS, DT, CLK);// Program with pins in class
-`` `
+```cpp
+SSPI<0, freq> spi;                  // hardware without CS
+SSPI<0, freq, cs> spi;              // hardware with template CS
+SSPI<0, freq> spi(cs);              // hardware with runtime CS
+SSPI<1, freq, cs, dt, clk> spi;     // software with template pins
+SSPI<1, freq> spi(cs, dt, clk);     // software with runtime pins
+```
+
+Use a separate include for `SSPI`:
+
+```cpp
+#include <GyverIO_SPI.h>
+```
+
+### SoftSPI
+Minimal software SPI master, mode 0, MSB first. Uses `gio::PinSingle`.
+
+```cpp
+SoftSPI spi;
+spi.begin(miso, mosi, clk);
+spi.setClock(1000000);
+spi.write(0x9f);
+spi.write(data, len);
+int value = spi.read();       // dummy 0xff on MOSI
+spi.read(data, len);
+uint8_t rx = spi.transfer(tx);
+spi.transfer(data, len);      // in-place transfer
+```
+
+Chip select is controlled separately.
+
+### SoftWire
+Minimal software I2C master with a Wire-like API. Uses `gio::PinIO`, supports clock stretching timeout and bus recovery in `begin()`.
+
+```cpp
+SoftWire wire;
+wire.begin(sda, scl);
+wire.setClock(100000);
+wire.beginTransmission(0x40);
+wire.write(0x01);
+wire.write(data, len);
+uint8_t status = wire.endTransmission();
+uint8_t count = wire.requestFrom(0x40, len);
+int value = wire.read();
+wire.read(data, len);
+wire.end();
+```
+
+`endTransmission()` status codes: `0` success, `2` address NACK, `3` data NACK, `4` bus error or timeout.
 
 ### compilation settings
-`` `CPP
-#define gio_use_arduino // Disable quick functions (replace with standard)
-#define gio_no_mask // Disable a quick IO based on AVR mask (in the Pinio class and all Shift)
-`` `
+```cpp
+#define GIO_USE_ARDUINO // Disable fast functions and use Arduino functions
+#define GIO_NO_MASK     // Disable AVR mask IO in PinIO/PinSingle/shift
+```
 
 <a id="usage"> </a>
 ## Usage
 
-`` `CPP
-Gio :: Write (3, 1);// Turn on PIN 3
+```cpp
+#include <GyverIO.h>
 
-// Send data on pins 3 and 4
-uint8_t data [] = {34, 63, 231, 9};
-Gio :: Shift :: Send (3, 4, MSBFIRST, DATA, 4);
-`` `
+gio::write(3, 1);
+
+uint8_t data[] = {34, 63, 231, 9};
+gio::shift::send(3, 4, MSBFIRST, data, 4);
+```
+
+```cpp
+#include <GyverIO_SPI.h>
+
+SSPI<0, f, cs> spi;
+spi.send(0x12);
+```
 
 <a id="versions"> </a>
 ## versions
