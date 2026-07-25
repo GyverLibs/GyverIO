@@ -194,19 +194,13 @@ SSPI<1, freq> spi(cs, dt, clk);	    // программный с пинами в
 ```cpp
 SoftSPI spi;
 spi.begin(miso, mosi, clk);
-spi.setClock(1000000);
 
-spi.write(0x9f);
-spi.write(data, len);
+SoftSPI_TX spi;
+spi.begin(mosi, clk);
 
-int value = spi.read();      // dummy 0xff на MOSI
-spi.read(data, len);
-
-uint8_t rx = spi.transfer(tx);
-spi.transfer(data, len);     // обмен in-place
+SoftSPI_RX spi;
+spi.begin(miso, clk);
 ```
-
-`setClock()` задаёт задержку полупериода. На высоких частотах задержка может стать 0, фактическая скорость будет ограничена скоростью GPIO и процессора. CS управляется отдельно.
 
 ### SoftWire
 Минимальный программный I2C master с API, близким к `Wire`. Работает через `gio::PinIO`, поддерживает clock stretching с таймаутом и попытку восстановления шины при `begin()`.
@@ -214,7 +208,6 @@ spi.transfer(data, len);     // обмен in-place
 ```cpp
 SoftWire wire;
 wire.begin(sda, scl);
-wire.setClock(100000);
 
 wire.beginTransmission(0x40);
 wire.write(0x01);

@@ -4,7 +4,7 @@
 #include "../pin/PinIO.h"
 
 #ifndef SOFTWIRE_DELAY_US
-#define SOFTWIRE_DELAY_US 5
+#define SOFTWIRE_DELAY_US 0
 #endif
 
 #ifndef SOFTWIRE_TIMEOUT_US
@@ -20,13 +20,7 @@ class SoftWire {
         _recover();
     }
 
-    void setClock(uint32_t clock) {
-        (void)clock;
-        // if (!clock) {
-        //     _delayUs = SOFTWIRE_DELAY_US;
-        //     return;
-        // }
-
+    void setClock(uint32_t) {
         // uint32_t half = 500000UL / clock;
         // _delayUs = (half > 65535UL) ? 65535 : half;
     }
@@ -128,12 +122,13 @@ class SoftWire {
     gio::PinIO _scl;
     uint8_t _rxLeft = 0;
     uint8_t _txStatus = 0;
-    // uint16_t _delayUs = SOFTWIRE_DELAY_US;
     bool _active = false;
     bool _started = false;
 
     void _delay() {
-        // if (_delayUs) delayMicroseconds(_delayUs);
+#if SOFTWIRE_DELAY_US > 0
+        delayMicroseconds(SOFTWIRE_DELAY_US);
+#endif
     }
 
     void _release(gio::PinIO& pin) {
@@ -151,10 +146,11 @@ class SoftWire {
 
     bool _clockHigh() {
         _release(_scl);
-        uint32_t start = micros();
-        while (!_read(_scl)) {
-            if (micros() - start >= SOFTWIRE_TIMEOUT_US) return false;
-            yield();
+        if (!_read(_scl)) {
+            uint32_t start = micros();
+            while (!_read(_scl)) {
+                if (micros() - start >= SOFTWIRE_TIMEOUT_US) return false;
+            }
         }
         _delay();
         return true;
