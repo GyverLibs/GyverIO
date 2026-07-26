@@ -13,7 +13,7 @@
 
 class SoftWire {
    public:
-    void begin(uint8_t sda, uint8_t scl) {
+    void begin(uint8_t sda = SDA, uint8_t scl = SCL) {
         _sda.init(sda, INPUT_PULLUP);
         _scl.init(scl, INPUT_PULLUP);
         _active = true;
@@ -28,11 +28,10 @@ class SoftWire {
     void end() {
         if (_active) {
             _stop();
-            if (_active) {
-                _release(_sda);
-                _release(_scl);
-            }
+            _release(_sda);
+            _release(_scl);
         }
+
         _active = false;
         _started = false;
         _rxLeft = 0;
@@ -69,9 +68,9 @@ class SoftWire {
     }
 
     size_t write(const uint8_t* data, size_t len) {
-        size_t res = 0;
-        while (len--) res += write(*data++);
-        return res;
+        size_t written = 0;
+        while (written < len && write(data[written])) written++;
+        return written;
     }
 
     uint8_t requestFrom(uint8_t address, uint8_t len) {
@@ -85,6 +84,10 @@ class SoftWire {
         }
         _rxLeft = len;
         return len;
+    }
+
+    uint8_t available() {
+        return _rxLeft;
     }
 
     int read() {

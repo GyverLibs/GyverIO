@@ -1,6 +1,7 @@
 #pragma once
 #include <SPI.h>
 
+#include "../gio/gio.h"
 #include "UniBus.h"
 
 template <class SPIClassT>
@@ -12,8 +13,8 @@ class SPIBus : public UniBus<SPIBus<SPIClassT>> {
         : _spi(spi), _settings(frequency, bitOrder, dataMode), _cs(cs) {}
 
     bool begin() {
-        digitalWrite(_cs, HIGH);
-        pinMode(_cs, OUTPUT);
+        gio::init(_cs, OUTPUT);
+        gio::high(_cs);
         return true;
     }
 
@@ -37,7 +38,7 @@ class SPIBus : public UniBus<SPIBus<SPIClassT>> {
 
     bool _begin(uint8_t reg) {
         _spi.beginTransaction(_settings);
-        digitalWrite(_cs, LOW);
+        gio::low(_cs);
         _spi.transfer(reg);
         return true;
     }
@@ -48,7 +49,7 @@ class SPIBus : public UniBus<SPIBus<SPIClassT>> {
     }
 
     bool _busEnd() {
-        digitalWrite(_cs, HIGH);
+        gio::high(_cs);
         _spi.endTransaction();
         return true;
     }
